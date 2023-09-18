@@ -2,7 +2,9 @@ import 'package:expense_tracker/model/expense.dart';
 import 'package:flutter/material.dart';
 
 class NewExpense extends StatefulWidget {
-  const NewExpense({super.key});
+  const NewExpense(this._onSaveButtonPressed, {super.key});
+
+  final void Function(Expense expense) _onSaveButtonPressed;
 
   @override
   State<NewExpense> createState() {
@@ -11,7 +13,7 @@ class NewExpense extends StatefulWidget {
 }
 
 class _NewExpenseState extends State<NewExpense> {
-  final _titleContoller = TextEditingController();
+  final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   DateTime? _selectedDate;
   var _selectedCategory = Category.leisure;
@@ -31,9 +33,9 @@ class _NewExpenseState extends State<NewExpense> {
   }
 
   void _submitExpenseData() {
-    final enterdAmount = double.tryParse(_amountController.text);
-    final amountIsInvalid = enterdAmount == null || enterdAmount < 0;
-    if (_titleContoller.text.trim().isEmpty ||
+    final enteredAmount = double.tryParse(_amountController.text);
+    final amountIsInvalid = enteredAmount == null || enteredAmount < 0;
+    if (_titleController.text.trim().isEmpty ||
         amountIsInvalid ||
         _selectedDate == null) {
       showDialog(
@@ -53,12 +55,22 @@ class _NewExpenseState extends State<NewExpense> {
         ),
       );
       return;
+    } else {
+      widget._onSaveButtonPressed(
+        Expense(
+          title: _titleController.text,
+          amount: enteredAmount,
+          date: _selectedDate!,
+          category: _selectedCategory,
+        ),
+      );
+      Navigator.pop(context);
     }
   }
 
   @override
   void dispose() {
-    _titleContoller.dispose();
+    _titleController.dispose();
     _amountController.dispose();
     super.dispose();
   }
@@ -66,11 +78,11 @@ class _NewExpenseState extends State<NewExpense> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
       child: Column(
         children: [
           TextField(
-            controller: _titleContoller,
+            controller: _titleController,
             maxLength: 50,
             decoration: const InputDecoration(
               label: Text('Title'),
